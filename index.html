@@ -79,6 +79,12 @@
         .logout-btn:hover {
             background: #cc0000;
         }
+        .session-info {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -109,6 +115,7 @@
         <div class="app-container">
             <h1>🔐 QR Code Calculator</h1>
             <p>Онлайн калькулятор кодов доступа</p>
+            <div class="session-info" id="sessionInfo"></div>
             
             <div class="input-group">
                 <label>URL из QR-кода:</label>
@@ -127,16 +134,29 @@
         </div>
     </div>
 
-    <script src="auth-config.js"></script>
     <script>
+        const VALID_USERS = {
+            'admin': 'password123',
+            'user': 'akyapak2024'
+        };
+
+        function generateSessionToken(username) {
+            return username + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
         function checkLogin() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('loginError');
             
             if (VALID_USERS[username] === password) {
+                const sessionToken = generateSessionToken(username);
+                
                 localStorage.setItem('qr_calc_auth', 'true');
                 localStorage.setItem('qr_calc_user', username);
+                localStorage.setItem('qr_calc_session', sessionToken);
+                localStorage.setItem('qr_calc_login_time', Date.now().toString());
+                
                 showApp();
             } else {
                 errorDiv.style.display = 'block';
@@ -146,16 +166,43 @@
         function showApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('appScreen').style.display = 'block';
+            updateSessionInfo();
+        }
+
+        function updateSessionInfo() {
+            const loginTime = parseInt(localStorage.getItem('qr_calc_login_time'));
+            const username = localStorage.getItem('qr_calc_user');
+            const sessionInfo = document.getElementById('sessionInfo');
+            
+            if (loginTime && username) {
+                const loginDate = new Date(loginTime);
+                const timeString = loginDate.toLocaleTimeString();
+                const dateString = loginDate.toLocaleDateString();
+                sessionInfo.textContent = `Пользователь: ${username} | Вход: ${dateString} ${timeString}`;
+            }
         }
 
         function logout() {
             localStorage.removeItem('qr_calc_auth');
             localStorage.removeItem('qr_calc_user');
+            localStorage.removeItem('qr_calc_session');
+            localStorage.removeItem('qr_calc_login_time');
             location.reload();
         }
 
         if (localStorage.getItem('qr_calc_auth') === 'true') {
-            showApp();
+            const sessionToken = localStorage.getItem('qr_calc_session');
+            const loginTime = parseInt(localStorage.getItem('qr_calc_login_time'));
+            const username = localStorage.getItem('qr_calc_user');
+            
+            const SESSION_DURATION = 8 * 60 * 60 * 1000;
+            
+            if (sessionToken && username && loginTime && 
+                (Date.now() - loginTime) < SESSION_DURATION) {
+                showApp();
+            } else {
+                logout();
+            }
         }
 
         function calculate() {
