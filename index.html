@@ -82,7 +82,6 @@
     </style>
 </head>
 <body>
-    <!-- ЭКРАН ВХОДА -->
     <div id="loginScreen">
         <div class="login-container">
             <h1>🔐 Вход в систему</h1>
@@ -106,7 +105,6 @@
         </div>
     </div>
 
-    <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
     <div id="appScreen" style="display: none;">
         <div class="app-container">
             <h1>🔐 QR Code Calculator</h1>
@@ -129,13 +127,8 @@
         </div>
     </div>
 
+    <script src="auth-config.js"></script>
     <script>
-        // 🔐 НАСТРОЙКИ ДОСТУПА
-        const VALID_USERS = {
-            'admin': 'password123',
-            'user': 'akyapak2024'
-        };
-
         function checkLogin() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -170,12 +163,12 @@
             const resultDiv = document.getElementById('result');
             
             if (!url) {
-                showResult('❌ Введите URL', 'error');
+                showResult('Введите URL', 'error');
                 return;
             }
 
             if (!url.includes('akyapakmakina.com') || !url.includes('Code')) {
-                showResult('❌ Неверный URL Akyapak', 'error');
+                showResult('Неверный URL Akyapak', 'error');
                 return;
             }
 
@@ -185,12 +178,12 @@
                 const result = calculateFinalResult(fourDigitCode);
                 
                 if (result !== null) {
-                    showResult(`✅ Код доступа: <b style="font-size: 24px;">${result}</b>`, 'success');
+                    showResult(`Код доступа: <b style="font-size: 24px;">${result}</b>`, 'success');
                 } else {
-                    showResult('❌ Не удалось вычислить код доступа', 'error');
+                    showResult('Не удалось вычислить код доступа', 'error');
                 }
             } catch (error) {
-                showResult('❌ Ошибка при вычислении', 'error');
+                showResult('Ошибка при вычислении', 'error');
             }
         }
 
@@ -212,10 +205,15 @@
         }
 
         function findFourDigitCode(codesMap) {
-            const codes = Object.values(codesMap);
-            for (let i = 0; i < codes.length; i++) {
-                if (codes[i].toString().startsWith('4')) {
-                    return codes[i];
+            if (codesMap['Code4']) {
+                return codesMap['Code4'];
+            }
+            
+            const codeKeys = Object.keys(codesMap);
+            for (let i = 0; i < codeKeys.length; i++) {
+                const key = codeKeys[i];
+                if (key.startsWith('Code') && codesMap[key].toString().startsWith('4')) {
+                    return codesMap[key];
                 }
             }
             return null;
