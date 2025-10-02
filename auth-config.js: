@@ -1,0 +1,5 @@
+javascript
+const VALID_USERS = {
+    'admin': 'password123',
+    'user': 'akyapak2024'
+};
