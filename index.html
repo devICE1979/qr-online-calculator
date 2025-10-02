@@ -69,9 +69,6 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-        button:active {
-            transform: translateY(0);
-        }
         .logout-btn {
             background: linear(135deg, #ff6b6b 0%, #ee5a24 100%);
             margin-top: 15px;
@@ -116,11 +113,11 @@
         <h1>🔐 Secure Access</h1>
         <div class="input-group">
             <label>Username:</label>
-            <input type="text" id="username" placeholder="Enter username" value="Ivan">
+            <input type="text" id="username" placeholder="Enter username">
         </div>
         <div class="input-group">
             <label>Password:</label>
-            <input type="password" id="password" placeholder="Enter password" value="iv369147as">
+            <input type="password" id="password" placeholder="Enter password">
         </div>
         <button id="loginBtn" type="button">Authenticate</button>
         <div id="loginError" class="error hidden">❌ Access denied</div>
@@ -131,7 +128,7 @@
         <h1>🔢 QR Code Calculator</h1>
         <div class="input-group">
             <label>QR Code URL:</label>
-            <input type="text" id="urlInput" placeholder="https://akyapakmakina.com/...?Code=...">
+            <input type="text" id="urlInput" placeholder="http://www.akyapakmakina.com/...?Code1=...&Code2=...">
         </div>
         <button id="calculateBtn" type="button">Compute Access Code</button>
         <div id="result" class="result">Result will appear here</div>
@@ -145,33 +142,25 @@
 
         // 🔑 Аутентификация
         function auth() {
-            console.log('Auth function called');
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('loginError');
             
-            console.log('Username:', username);
-            console.log('Password:', password);
-            
             errorDiv.classList.add('hidden');
             
-            // Проверка учетных данных
             if (username === 'Ivan' && password === 'iv369147as') {
-                console.log('Authentication successful');
                 const loginTime = Date.now();
                 localStorage.setItem('qr_auth', 'true');
                 localStorage.setItem('qr_user', username);
                 localStorage.setItem('qr_login_time', loginTime.toString());
                 showApp();
             } else {
-                console.log('Authentication failed');
                 errorDiv.classList.remove('hidden');
             }
         }
 
         // 🚀 Показать приложение
         function showApp() {
-            console.log('Showing app screen');
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
             startSessionTimer();
@@ -205,16 +194,14 @@
 
         // 🚪 Выход
         function logout() {
-            console.log('Logging out');
             localStorage.removeItem('qr_auth');
             localStorage.removeItem('qr_user');
             localStorage.removeItem('qr_login_time');
             location.reload();
         }
 
-        // 🧮 ОСНОВНОЙ АЛГОРИТМ ВЫЧИСЛЕНИЙ
+        // 🧮 АЛГОРИТМ ВЫЧИСЛЕНИЙ (аналог Excel формулы)
         function calculate() {
-            console.log('Calculate function called');
             const url = document.getElementById('urlInput').value.trim();
             const resultDiv = document.getElementById('result');
             
@@ -230,17 +217,17 @@
                 const codes = extractCodesFromURL(url);
                 console.log('Extracted codes:', codes);
                 
-                // Ищем основной код (Code4 или код начинающийся с 4)
-                const mainCode = findMainCode(codes);
-                console.log('Main code found:', mainCode);
+                // Ищем основной код (Code4)
+                const mainCode = codes['Code4'];
+                console.log('Main code (Code4):', mainCode);
                 
                 if (!mainCode) {
-                    showResult('❌ No valid code found in URL', 'error');
+                    showResult('❌ Code4 not found in URL', 'error');
                     return;
                 }
 
-                // Вычисляем результат
-                const result = computeResult(mainCode);
+                // Вычисляем результат по алгоритму Excel
+                const result = computeExcelAlgorithm(mainCode);
                 console.log('Computed result:', result);
                 
                 if (result !== null) {
@@ -259,7 +246,7 @@
         function extractCodesFromURL(urlString) {
             // Добавляем протокол если отсутствует
             if (!urlString.startsWith('http')) {
-                urlString = 'https://' + urlString;
+                urlString = 'http://' + urlString;
             }
             
             const url = new URL(urlString);
@@ -278,41 +265,44 @@
             return codes;
         }
 
-        // 🔎 Поиск основного кода
-        function findMainCode(codes) {
-            // Сначала ищем Code4
-            if (codes['Code4'] !== undefined) {
-                return codes['Code4'];
-            }
-            
-            // Ищем любой код, который начинается с цифры 4
-            for (let key in codes) {
-                if (key.startsWith('Code') && codes[key]) {
-                    const codeStr = codes[key].toString();
-                    // Ищем 6-значные коды начинающиеся с 4
-                    if (codeStr.length === 6 && codeStr.startsWith('4')) {
-                        return codes[key];
-                    }
-                }
-            }
-            
-            return null;
-        }
-
-        // 🧮 Вычисление результата
-        function computeResult(mainCode) {
-            // Диапазоны и вычитаемые значения для Akyapak
+        // 🧮 РЕАЛИЗАЦИЯ АЛГОРИТМА EXCEL
+        // =B2-ВЫБОР(МАКС((B2>={442000;444000;445000;454000;456000})*{1;2;3;4;5});441473;443473;443475;453487;455487)
+        function computeExcelAlgorithm(mainCode) {
+            // Диапазоны для проверки (B2>={442000;444000;445000;454000;456000})
             const ranges = [442000, 444000, 445000, 454000, 456000];
+            
+            // Значения для вычитания (441473;443473;443475;453487;455487)
             const subtractValues = [441473, 443473, 443475, 453487, 455487];
             
-            // Ищем подходящий диапазон (с конца)
-            for (let i = ranges.length - 1; i >= 0; i--) {
-                if (mainCode >= ranges[i]) {
-                    return mainCode - subtractValues[i];
-                }
+            // Индексы {1;2;3;4;5} (в JavaScript индексы с 0, поэтому +1)
+            const indices = [1, 2, 3, 4, 5];
+            
+            // (B2>={442000;444000;445000;454000;456000}) - создаем массив true/false
+            const comparisons = ranges.map(range => mainCode >= range);
+            console.log('Comparisons:', comparisons);
+            
+            // Умножаем на индексы {1;2;3;4;5} - true становится 1, false становится 0
+            const multiplied = comparisons.map((comp, index) => comp ? indices[index] : 0);
+            console.log('Multiplied by indices:', multiplied);
+            
+            // Находим МАКСИМАЛЬНОЕ значение
+            const maxIndex = Math.max(...multiplied);
+            console.log('Max index found:', maxIndex);
+            
+            // Если maxIndex = 0, значит код меньше всех диапазонов
+            if (maxIndex === 0) {
+                return null;
             }
             
-            return null;
+            // ВЫБОР по индексу (в JavaScript индексы с 0, поэтому -1)
+            const subtractValue = subtractValues[maxIndex - 1];
+            console.log('Subtract value:', subtractValue);
+            
+            // B2 - выбранное_значение
+            const result = mainCode - subtractValue;
+            console.log(`Calculation: ${mainCode} - ${subtractValue} = ${result}`);
+            
+            return result;
         }
 
         // 📝 Показать результат
@@ -331,8 +321,6 @@
 
         // 🏁 Инициализация
         function init() {
-            console.log('Initializing application');
-            
             if (localStorage.getItem('qr_auth') === 'true') {
                 const loginTime = parseInt(localStorage.getItem('qr_login_time'));
                 if (Date.now() - loginTime < SESSION_TIME) {
@@ -345,8 +333,6 @@
 
         // 📋 ОБРАБОТЧИКИ СОБЫТИЙ
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up event listeners');
-            
             // Обработчик кнопки входа
             document.getElementById('loginBtn').addEventListener('click', auth);
             
@@ -374,19 +360,28 @@
             
             // Инициализация приложения
             init();
-            
-            console.log('Event listeners setup complete');
         });
 
-        // 🧪 ТЕСТОВАЯ ФУНКЦИЯ
-        function testAuth() {
-            console.log('=== TESTING AUTH ===');
-            console.log('Login button:', document.getElementById('loginBtn'));
-            console.log('Calculate button:', document.getElementById('calculateBtn'));
+        // 🧪 ТЕСТОВЫЕ ДАННЫЕ
+        function testAlgorithm() {
+            console.log('=== ТЕСТИРОВАНИЕ АЛГОРИТМА ===');
+            
+            const testCases = [
+                { code: 445000, expected: 1525 }, // 445000 - 443475 = 1525
+                { code: 444500, expected: 1027 }, // 444500 - 443473 = 1027
+                { code: 443000, expected: 1527 }, // 443000 - 441473 = 1527
+                { code: 455000, expected: 1513 }, // 455000 - 453487 = 1513
+                { code: 456500, expected: 1013 }  // 456500 - 455487 = 1013
+            ];
+            
+            testCases.forEach(test => {
+                const result = computeExcelAlgorithm(test.code);
+                console.log(`Code: ${test.code}, Expected: ${test.expected}, Got: ${result}, ${result === test.expected ? '✓' : '✗'}`);
+            });
         }
         
-        // Запуск теста
-        testAuth();
+        // Раскомментируйте для тестирования:
+        // testAlgorithm();
     </script>
 </body>
 </html>
