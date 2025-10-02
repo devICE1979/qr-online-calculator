@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 QR Code Calculator</h1>
+        <p>Простой калькулятор кодов доступа</p>
+        
+        <input type="text" id="urlInput" placeholder="Введите URL...">
+        <button onclick="calculate()">Вычислить</button>
+        
+        <div id="result" class="result">
+            Результат появится здесь
+        </div>
+    </div>
 
+    <script>
+        function calculate() {
+            const input = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!input) {
+                resultDiv.innerHTML = '❌ Введите URL';
+                return;
+            }
+            
+            resultDiv.innerHTML = '✅ Код доступа: 1234 (пример)';
+        }
+    </script>
+</body>
+</html>
