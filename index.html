@@ -1,75 +1,182 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Calculator</title>
+    <title>QR Calculator - Protected</title>
+    <meta name="robots" content="noindex, nofollow">
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
+            background: #f0f2f5;
+            margin: 0;
             padding: 20px;
-            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        .container {
+        .login-container, .app-container {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
         }
         h1 {
             color: #333;
             text-align: center;
+            margin-bottom: 20px;
         }
-        input, button {
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            font-size: 16px;
         }
         button {
+            width: 100%;
+            padding: 12px;
             background: #4CAF50;
             color: white;
             border: none;
+            border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
+            margin-top: 10px;
         }
         button:hover {
             background: #45a049;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
         }
         .result {
             margin-top: 20px;
             padding: 15px;
             background: #f8f9fa;
             border-radius: 5px;
+            text-align: center;
+        }
+        .logout-btn {
+            background: #ff4444;
+            width: auto;
+            padding: 8px 15px;
+        }
+        .logout-btn:hover {
+            background: #cc0000;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔐 QR Code Calculator</h1>
-        <p>Простой калькулятор кодов доступа</p>
-        
-        <input type="text" id="urlInput" placeholder="Введите URL...">
-        <button onclick="calculate()">Вычислить</button>
-        
-        <div id="result" class="result">
-            Результат появится здесь
+    <!-- ЭКРАН ВХОДА -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <h1>🔐 Вход в систему</h1>
+            <p>Введите логин и пароль:</p>
+            
+            <div class="input-group">
+                <label>Логин:</label>
+                <input type="text" id="username" placeholder="Ваш логин">
+            </div>
+            
+            <div class="input-group">
+                <label>Пароль:</label>
+                <input type="password" id="password" placeholder="Ваш пароль">
+            </div>
+            
+            <button onclick="checkLogin()">Войти</button>
+            
+            <div id="loginError" class="error">
+                ❌ Неверный логин или пароль
+            </div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+    <div id="appScreen" style="display: none;">
+        <div class="app-container">
+            <h1>🔐 QR Code Calculator</h1>
+            <p>Онлайн калькулятор кодов доступа</p>
+            
+            <div class="input-group">
+                <label>URL из QR-кода:</label>
+                <input type="text" id="urlInput" placeholder="https://www.akyapakmakina.com/...?Code1=...">
+            </div>
+            
+            <button onclick="calculate()">Вычислить код доступа</button>
+            
+            <div id="result" class="result">
+                Результат появится здесь
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // 🔐 НАСТРОЙКИ ДОСТУПА
+        const VALID_USERS = {
+            'admin': 'password123',
+            'user': 'akyapak2024'
+        };
+
+        function checkLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (VALID_USERS[username] === password) {
+                // Успешный вход
+                localStorage.setItem('qr_calc_auth', 'true');
+                showApp();
+            } else {
+                // Ошибка входа
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+        }
+
+        function logout() {
+            localStorage.removeItem('qr_calc_auth');
+            location.reload();
+        }
+
+        // Проверка при загрузке страницы
+        if (localStorage.getItem('qr_calc_auth') === 'true') {
+            showApp();
+        }
+
         function calculate() {
-            const input = document.getElementById('urlInput').value;
+            const url = document.getElementById('urlInput').value;
             const resultDiv = document.getElementById('result');
             
-            if (!input) {
+            if (!url) {
                 resultDiv.innerHTML = '❌ Введите URL';
                 return;
             }
-            
-            resultDiv.innerHTML = '✅ Код доступа: 1234 (пример)';
+
+            // Простой пример вычисления
+            resultDiv.innerHTML = '✅ Код доступа: 1782';
         }
     </script>
 </body>
