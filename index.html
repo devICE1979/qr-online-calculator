@@ -166,14 +166,57 @@
             showApp();
         }
 
-        function calculate() {
-            const url = document.getElementById('urlInput').value;
-            const resultDiv = document.getElementById('result');
-            
-            if (!url) {
-                resultDiv.innerHTML = '❌ Введите URL';
-                return;
-            }
+async function calculate() {
+    const url = document.getElementById('urlInput').value;
+    const resultDiv = document.getElementById('result');
+    const calculateBtn = document.querySelector('button[onclick="calculate()"]');
+    
+    if (!url) {
+        showResult('❌ Введите URL', 'error');
+        return;
+    }
+    
+    if (!url.includes('akyapakmakina.com') || !url.includes('Code')) {
+        showResult('❌ Неверный URL Akyapak', 'error');
+        return;
+    }
+    
+    // Показываем загрузку
+    calculateBtn.disabled = true;
+    calculateBtn.textContent = 'Вычисляем...';
+    showResult('⏳ Вычисляем код доступа...', 'loading');
+    
+    try {
+        // 🔒 ОТПРАВЛЯЕМ ЗАПРОС НА БЭКЕНД
+        const response = await fetch('/api/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showResult(`✅ Код доступа: <b style="font-size: 24px;">${data.result}</b>`, 'success');
+        } else {
+            showResult(`❌ ${data.error}`, 'error');
+        }
+    } catch (error) {
+        showResult('❌ Ошибка соединения с сервером', 'error');
+    } finally {
+        calculateBtn.disabled = false;
+        calculateBtn.textContent = 'Вычислить код доступа';
+    }
+}
+
+// Добавьте эту вспомогательную функцию
+function showResult(message, type = '') {
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = message;
+    resultDiv.className = 'result ' + type;
+}
 
             // Простой пример вычисления
             resultDiv.innerHTML = '✅ Код доступа: 1782';
