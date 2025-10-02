@@ -85,6 +85,10 @@
             text-align: center;
             margin-top: 10px;
         }
+        .session-warning {
+            color: #e67e22;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -107,6 +111,9 @@
             
             <div id="loginError" class="error">
                 ❌ Неверный логин или пароль
+            </div>
+            <div id="sessionError" class="error">
+                ❌ Учетная запись уже используется
             </div>
         </div>
     </div>
@@ -134,236 +141,184 @@
         </div>
     </div>
 
-   <script>
-    const VALID_USERS = {
-        'admin': 'password123',
-        'user': 'akyapak2024'
-    };
+    <script src="calculator-algorithm.js"></script>
+    <script>
+        const SESSION_DURATION = 5 * 60 * 1000;
+        const ACTIVE_SESSIONS = {};
 
-    const SESSION_DURATION = 5 * 60 * 1000; // 5 минут
-
-    function generateSessionToken(username) {
-        return username + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    function checkLogin() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const errorDiv = document.getElementById('loginError');
-        
-        if (VALID_USERS[username] === password) {
-            const sessionToken = generateSessionToken(username);
-            
-            localStorage.setItem('qr_calc_auth', 'true');
-            localStorage.setItem('qr_calc_user', username);
-            localStorage.setItem('qr_calc_session', sessionToken);
-            localStorage.setItem('qr_calc_login_time', Date.now().toString());
-            
-            showApp();
-        } else {
-            errorDiv.style.display = 'block';
+        function getEncryptedCredentials() {
+            return {
+                'SXZhbg==': 'aXYzNjkxNDdhcw==' // 
+            };
         }
-    }
 
-    function showApp() {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appScreen').style.display = 'block';
-        startSessionTimer();
-    }
+        function generateSessionToken(username) {
+            return username + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
 
-    function startSessionTimer() {
-        const loginTime = parseInt(localStorage.getItem('qr_calc_login_time'));
-        const sessionInfo = document.getElementById('sessionInfo');
-        
-        function updateTimer() {
-            const now = Date.now();
-            const elapsed = now - loginTime;
-            const remaining = SESSION_DURATION - elapsed;
+        function checkLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            const sessionError = document.getElementById('sessionError');
             
-            if (remaining <= 0) {
+            loginError.style.display = 'none';
+            sessionError.style.display = 'none';
+
+            const encryptedUsers = getEncryptedCredentials();
+            const encryptedUsername = btoa(unescape(encodeURIComponent(username)));
+            const encryptedPassword = btoa(unescape(encodeURIComponent(password)));
+            
+            if (encryptedUsers[encryptedUsername] === encryptedPassword) {
+                if (ACTIVE_SESSIONS[username]) {
+                    sessionError.style.display = 'block';
+                    return;
+                }
+
+                const sessionToken = generateSessionToken(username);
+                ACTIVE_SESSIONS[username] = sessionToken;
+                
+                localStorage.setItem('qr_calc_auth', 'true');
+                localStorage.setItem('qr_calc_user', username);
+                localStorage.setItem('qr_calc_session', sessionToken);
+                localStorage.setItem('qr_calc_login_time', Date.now().toString());
+                
+                showApp();
+            } else {
+                loginError.style.display = 'block';
+            }
+        }
+
+        function showApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            startSessionTimer();
+        }
+
+        function startSessionTimer() {
+            const loginTime = parseInt(localStorage.getItem('qr_calc_login_time'));
+            const sessionInfo = document.getElementById('sessionInfo');
+            
+            function updateTimer() {
+                const now = Date.now();
+                const elapsed = now - loginTime;
+                const remaining = SESSION_DURATION - elapsed;
+                
+                if (remaining <= 0) {
+                    logout();
+                    return;
+                }
+                
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                
+                const username = localStorage.getItem('qr_calc_user');
+                const loginDate = new Date(loginTime);
+                const timeString = loginDate.toLocaleTimeString();
+                const dateString = loginDate.toLocaleDateString();
+                
+                let warningText = '';
+                if (minutes < 1) {
+                    warningText = '<div class="session-warning">⚠️ Сессия скоро завершится!</div>';
+                }
+                
+                sessionInfo.innerHTML = `Пользователь: ${username} | Вход: ${dateString} ${timeString} | Автовыход через: ${minutes}:${seconds.toString().padStart(2, '0')}${warningText}`;
+            }
+            
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+            
+            window.sessionTimer = timerInterval;
+        }
+
+        function logout() {
+            const username = localStorage.getItem('qr_calc_user');
+            if (username && ACTIVE_SESSIONS[username]) {
+                delete ACTIVE_SESSIONS[username];
+            }
+            
+            if (window.sessionTimer) {
+                clearInterval(window.sessionTimer);
+            }
+            
+            localStorage.removeItem('qr_calc_auth');
+            localStorage.removeItem('qr_calc_user');
+            localStorage.removeItem('qr_calc_session');
+            localStorage.removeItem('qr_calc_login_time');
+            location.reload();
+        }
+
+        if (localStorage.getItem('qr_calc_auth') === 'true') {
+            const sessionToken = localStorage.getItem('qr_calc_session');
+            const loginTime = parseInt(localStorage.getItem('qr_calc_login_time'));
+            const username = localStorage.getItem('qr_calc_user');
+            
+            if (sessionToken && username && loginTime && 
+                (Date.now() - loginTime) < SESSION_DURATION) {
+                
+                ACTIVE_SESSIONS[username] = sessionToken;
+                showApp();
+            } else {
                 logout();
+            }
+        }
+
+        function calculate() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!url) {
+                showResult('Введите URL', 'error');
                 return;
             }
-            
-            const minutes = Math.floor(remaining / 60000);
-            const seconds = Math.floor((remaining % 60000) / 1000);
-            
-            const username = localStorage.getItem('qr_calc_user');
-            const loginDate = new Date(loginTime);
-            const timeString = loginDate.toLocaleTimeString();
-            const dateString = loginDate.toLocaleDateString();
-            
-            sessionInfo.textContent = `Пользователь: ${username} | Вход: ${dateString} ${timeString} | Автовыход через: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-        
-        updateTimer();
-        setInterval(updateTimer, 1000);
-    }
 
-    function logout() {
-        localStorage.removeItem('qr_calc_auth');
-        localStorage.removeItem('qr_calc_user');
-        localStorage.removeItem('qr_calc_session');
-        localStorage.removeItem('qr_calc_login_time');
-        location.reload();
-    }
+            if (!url.includes('akyapakmakina.com') || !url.includes('Code')) {
+                showResult('Неверный URL Akyapak', 'error');
+                return;
+            }
 
-    if (localStorage.getItem('qr_calc_auth') === 'true') {
-        const sessionToken = localStorage.getItem('qr_calc_session');
-        const loginTime = parseInt(localStorage.getItem('qr_calc_login_time'));
-        const username = localStorage.getItem('qr_calc_user');
-        
-        if (sessionToken && username && loginTime && 
-            (Date.now() - loginTime) < SESSION_DURATION) {
-            showApp();
-        } else {
-            logout();
-        }
-    }
-
-    function calculate() {
-        const url = document.getElementById('urlInput').value;
-        const resultDiv = document.getElementById('result');
-        
-        if (!url) {
-            showResult('Введите URL', 'error');
-            return;
+            try {
+                const result = calculateAccessCode(url);
+                
+                if (result !== null) {
+                    showResult(`Код доступа: <b style="font-size: 24px;">${result}</b>`, 'success');
+                } else {
+                    showResult('Не удалось вычислить код доступа', 'error');
+                }
+            } catch (error) {
+                showResult('Ошибка при вычислении', 'error');
+            }
         }
 
-        if (!url.includes('akyapakmakina.com') || !url.includes('Code')) {
-            showResult('Неверный URL Akyapak', 'error');
-            return;
+        function showResult(message, type = '') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = 'result ' + type;
         }
 
-        try {
-            const codes = extractCodesFromURL(url);
-            const fourDigitCode = findFourDigitCode(codes);
-            const result = calculateFinalResult(fourDigitCode);
-            
-            if (result !== null) {
-                showResult(`Код доступа: <b style="font-size: 24px;">${result}</b>`, 'success');
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkLogin();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('qr_calc_auth')) {
+                document.getElementById('username').focus();
             } else {
-                showResult('Не удалось вычислить код доступа', 'error');
-                }
-        } catch (error) {
-            showResult('Ошибка при вычислении', 'error');
-        }
-    }
-
-    function extractCodesFromURL(urlString) {
-        try {
-            const url = new URL(urlString);
-            const params = new URLSearchParams(url.search);
-            let codes = {};
-            
-            for (let [key, value] of params) {
-                if (key.startsWith('Code')) {
-                    codes[key] = parseInt(value);
-                }
+                document.getElementById('urlInput').focus();
             }
-            return codes;
-        } catch (error) {
-            throw new Error('Неверный формат URL');
-        }
-    }
+        });
 
-    function findFourDigitCode(codesMap) {
-        if (codesMap['Code4']) {
-            return codesMap['Code4'];
-        }
-        
-        const codeKeys = Object.keys(codesMap);
-        for (let i = 0; i < codeKeys.length; i++) {
-            const key = codeKeys[i];
-            if (key.startsWith('Code') && codesMap[key].toString().startsWith('4')) {
-                return codesMap[key];
-            }
-        }
-        return null;
-    }
-
-   function calculateFinalResult(mainCode) {
-    if (!mainCode) return null;
-    
-    console.log('Вычисляем для Code4:', mainCode);
-    
-    // Прямой алгоритм без сложностей
-    if (mainCode >= 456000) return mainCode - 455487;
-    if (mainCode >= 454000) return mainCode - 453487;
-    if (mainCode >= 445000) return mainCode - 443475;
-    if (mainCode >= 444000) return mainCode - 443473;
-    if (mainCode >= 442000) return mainCode - 441473;
-    
-    return null;
-}
-    }
-
-    function obtainSettings() {
-        return {
-            segmentAlpha: "442000,441473",
-            segmentBeta: ["444000", "443473"],
-            segmentGamma: { thresholdValue: 445000, baseNumber: 443475 },
-            segmentDelta: { check: 454000, subtract: 453487 },
-            segmentEpsilon: "456000:455487",
-            extraParams: {
-                offset: 0,
-                multiplier: 1
-            }
-        };
-    }
-
-    function transformConfiguration(rawConfig) {
-        const checkPoints = [];
-        const deductionValues = [];
-        
-        const alphaComponents = rawConfig.segmentAlpha.split(',');
-        checkPoints.push(parseInt(alphaComponents[0]) + rawConfig.extraParams.offset);
-        deductionValues.push(parseInt(alphaComponents[1]) + rawConfig.extraParams.offset);
-        
-        checkPoints.push(parseInt(rawConfig.segmentBeta[0]) * rawConfig.extraParams.multiplier);
-        deductionValues.push(parseInt(rawConfig.segmentBeta[1]) * rawConfig.extraParams.multiplier);
-        
-        checkPoints.push(rawConfig.segmentGamma.thresholdValue);
-        deductionValues.push(rawConfig.segmentGamma.baseNumber);
-        
-        checkPoints.push(rawConfig.segmentDelta.check);
-        deductionValues.push(rawConfig.segmentDelta.subtract);
-        
-        const epsilonParts = rawConfig.segmentEpsilon.split(':');
-        checkPoints.push(parseInt(epsilonParts[0]));
-        deductionValues.push(parseInt(epsilonParts[1]));
-        
-        return { 
-            checkPoints, 
-            deductionValues 
-        };
-    }
-
-    function showResult(message, type = '') {
-        const resultDiv = document.getElementById('result');
-        resultDiv.innerHTML = message;
-        resultDiv.className = 'result ' + type;
-    }
-
-    document.getElementById('urlInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            calculate();
-        }
-    });
-
-    document.getElementById('password').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkLogin();
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!localStorage.getItem('qr_calc_auth')) {
-            document.getElementById('username').focus();
-        } else {
-            document.getElementById('urlInput').focus();
-        }
-    });
-</script>
+        window.addEventListener('beforeunload', function() {
+            logout();
+        });
+    </script>
 </body>
 </html>
