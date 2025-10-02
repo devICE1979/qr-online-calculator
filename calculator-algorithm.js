@@ -1,10 +1,12 @@
-function calculateAccessCode(url) {
+// calculator-algorithm.js
+window.calculateAccessCode = function(url) {
     try {
         const codes = extractCodesFromURL(url);
         const fourDigitCode = findFourDigitCode(codes);
         const result = calculateFinalResult(fourDigitCode);
         return result;
     } catch (error) {
+        console.error('Ошибка вычисления:', error);
         return null;
     }
 }
