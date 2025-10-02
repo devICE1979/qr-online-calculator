@@ -69,6 +69,9 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
+        button:active {
+            transform: translateY(0);
+        }
         .logout-btn {
             background: linear(135deg, #ff6b6b 0%, #ee5a24 100%);
             margin-top: 15px;
@@ -113,13 +116,13 @@
         <h1>🔐 Secure Access</h1>
         <div class="input-group">
             <label>Username:</label>
-            <input type="text" id="username" placeholder="Enter username">
+            <input type="text" id="username" placeholder="Enter username" value="Ivan">
         </div>
         <div class="input-group">
             <label>Password:</label>
-            <input type="password" id="password" placeholder="Enter password">
+            <input type="password" id="password" placeholder="Enter password" value="iv369147as">
         </div>
-        <button onclick="auth()">Authenticate</button>
+        <button id="loginBtn" type="button">Authenticate</button>
         <div id="loginError" class="error hidden">❌ Access denied</div>
     </div>
 
@@ -130,10 +133,10 @@
             <label>QR Code URL:</label>
             <input type="text" id="urlInput" placeholder="https://akyapakmakina.com/...?Code=...">
         </div>
-        <button onclick="calculate()">Compute Access Code</button>
+        <button id="calculateBtn" type="button">Compute Access Code</button>
         <div id="result" class="result">Result will appear here</div>
         <div class="session-info" id="sessionInfo"></div>
-        <button class="logout-btn" onclick="logout()">Terminate Session</button>
+        <button class="logout-btn" id="logoutBtn" type="button">Terminate Session</button>
     </div>
 
     <script>
@@ -142,26 +145,33 @@
 
         // 🔑 Аутентификация
         function auth() {
+            console.log('Auth function called');
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('loginError');
+            
+            console.log('Username:', username);
+            console.log('Password:', password);
             
             errorDiv.classList.add('hidden');
             
             // Проверка учетных данных
             if (username === 'Ivan' && password === 'iv369147as') {
+                console.log('Authentication successful');
                 const loginTime = Date.now();
                 localStorage.setItem('qr_auth', 'true');
                 localStorage.setItem('qr_user', username);
                 localStorage.setItem('qr_login_time', loginTime.toString());
                 showApp();
             } else {
+                console.log('Authentication failed');
                 errorDiv.classList.remove('hidden');
             }
         }
 
         // 🚀 Показать приложение
         function showApp() {
+            console.log('Showing app screen');
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
             startSessionTimer();
@@ -195,6 +205,7 @@
 
         // 🚪 Выход
         function logout() {
+            console.log('Logging out');
             localStorage.removeItem('qr_auth');
             localStorage.removeItem('qr_user');
             localStorage.removeItem('qr_login_time');
@@ -203,6 +214,7 @@
 
         // 🧮 ОСНОВНОЙ АЛГОРИТМ ВЫЧИСЛЕНИЙ
         function calculate() {
+            console.log('Calculate function called');
             const url = document.getElementById('urlInput').value.trim();
             const resultDiv = document.getElementById('result');
             
@@ -287,7 +299,7 @@
             return null;
         }
 
-        // 🧮 Вычисление результата (исправленный алгоритм)
+        // 🧮 Вычисление результата
         function computeResult(mainCode) {
             // Диапазоны и вычитаемые значения для Akyapak
             const ranges = [442000, 444000, 445000, 454000, 456000];
@@ -319,6 +331,8 @@
 
         // 🏁 Инициализация
         function init() {
+            console.log('Initializing application');
+            
             if (localStorage.getItem('qr_auth') === 'true') {
                 const loginTime = parseInt(localStorage.getItem('qr_login_time'));
                 if (Date.now() - loginTime < SESSION_TIME) {
@@ -329,51 +343,50 @@
             }
         }
 
-        // 📋 Обработчики событий
-        document.getElementById('password').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') auth();
-        });
-        
-        document.getElementById('urlInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') calculate();
-        });
-
-        // 🚀 Запуск при загрузке
+        // 📋 ОБРАБОТЧИКИ СОБЫТИЙ
         document.addEventListener('DOMContentLoaded', function() {
-            init();
+            console.log('DOM loaded, setting up event listeners');
             
-            // Автофокус на поле ввода
+            // Обработчик кнопки входа
+            document.getElementById('loginBtn').addEventListener('click', auth);
+            
+            // Обработчик кнопки вычисления
+            document.getElementById('calculateBtn').addEventListener('click', calculate);
+            
+            // Обработчик кнопки выхода
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Обработчики Enter в полях ввода
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') auth();
+            });
+            
+            document.getElementById('urlInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') calculate();
+            });
+
+            // Автофокус
             if (!localStorage.getItem('qr_auth')) {
                 document.getElementById('username').focus();
             } else {
                 document.getElementById('urlInput').focus();
             }
+            
+            // Инициализация приложения
+            init();
+            
+            console.log('Event listeners setup complete');
         });
 
-        // 🧪 ТЕСТОВЫЕ ФУНКЦИИ (можно удалить в продакшене)
-        function testCalculation() {
-            const testURLs = [
-                'https://akyapakmakina.com/test?Code1=123456&Code4=445000',
-                'https://akyapakmakina.com/?Code4=450000',
-                'https://akyapakmakina.com/page?Code2=444500&Code3=445500'
-            ];
-            
-            console.log('=== ТЕСТИРОВАНИЕ АЛГОРИТМА ===');
-            testURLs.forEach(url => {
-                console.log('Testing URL:', url);
-                try {
-                    const codes = extractCodesFromURL(url);
-                    const mainCode = findMainCode(codes);
-                    const result = computeResult(mainCode);
-                    console.log(`Result: ${mainCode} -> ${result}`);
-                } catch (e) {
-                    console.error('Test failed:', e);
-                }
-            });
+        // 🧪 ТЕСТОВАЯ ФУНКЦИЯ
+        function testAuth() {
+            console.log('=== TESTING AUTH ===');
+            console.log('Login button:', document.getElementById('loginBtn'));
+            console.log('Calculate button:', document.getElementById('calculateBtn'));
         }
         
-        // Раскомментируйте для тестирования:
-        // testCalculation();
+        // Запуск теста
+        testAuth();
     </script>
 </body>
 </html>
