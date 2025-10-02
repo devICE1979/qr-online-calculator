@@ -282,18 +282,20 @@
         return null;
     }
 
-    function calculateFinalResult(mainCode) {
-        if (!mainCode) return null;
-        
-        const configuration = obtainSettings();
-        const processedConfig = transformConfiguration(configuration);
-        
-        for (let index = processedConfig.checkPoints.length - 1; index >= 0; index--) {
-            if (mainCode >= processedConfig.checkPoints[index]) {
-                return mainCode - processedConfig.deductionValues[index];
-            }
-        }
-        return null;
+   function calculateFinalResult(mainCode) {
+    if (!mainCode) return null;
+    
+    console.log('Вычисляем для Code4:', mainCode);
+    
+    // Прямой алгоритм без сложностей
+    if (mainCode >= 456000) return mainCode - 455487;
+    if (mainCode >= 454000) return mainCode - 453487;
+    if (mainCode >= 445000) return mainCode - 443475;
+    if (mainCode >= 444000) return mainCode - 443473;
+    if (mainCode >= 442000) return mainCode - 441473;
+    
+    return null;
+}
     }
 
     function obtainSettings() {
