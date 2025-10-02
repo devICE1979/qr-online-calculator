@@ -6,109 +6,10 @@
     <title>Secure QR Calculator</title>
     <meta name="robots" content="noindex, nofollow">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: rgba(255,255,255,0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 450px;
-            backdrop-filter: blur(10px);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background: linear(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        .logout-btn {
-            background: linear(135deg, #ff6b6b 0%, #ee5a24 100%);
-            margin-top: 15px;
-            padding: 10px;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 18px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #dee2e6;
-        }
-        .error {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        .session-info {
-            font-size: 12px;
-            color: #7f8c8d;
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            background: #ecf0f1;
-            border-radius: 5px;
-        }
-        .hidden {
-            display: none;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}.container{background:rgba(255,255,255,0.95);padding:30px;border-radius:15px;box-shadow:0 20px 40px rgba(0,0,0,0.1);width:100%;max-width:450px;backdrop-filter:blur(10px)}h1{text-align:center;color:#333;margin-bottom:20px;font-size:24px}.input-group{margin-bottom:20px}label{display:block;margin-bottom:8px;color:#555;font-weight:500}input{width:100%;padding:12px 15px;border:2px solid #e1e5e9;border-radius:8px;font-size:16px;transition:all 0.3s ease}input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1)}button{width:100%;padding:14px;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;margin-bottom:10px}button:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,0.2)}.calc-btn{background:linear(135deg,#27ae60 0%,#2ecc71 100%)}.new-btn{background:linear(135deg,#f39c12 0%,#f1c40f 100%)}.clear-btn{background:linear(135deg,#e67e22 0%,#d35400 100%)}.logout-btn{background:linear(135deg,#e74c3c 0%,#c0392b 100%)}.result{margin-top:20px;padding:20px;background:#f8f9fa;border-radius:8px;text-align:center;font-size:18px;min-height:60px;display:flex;align-items:center;justify-content:center;border:2px dashed #dee2e6}.error{color:#e74c3c;text-align:center;margin-top:10px;font-size:14px}.session-info{font-size:12px;color:#7f8c8d;text-align:center;margin-top:15px;padding:10px;background:#ecf0f1;border-radius:5px}.hidden{display:none}
     </style>
 </head>
 <body>
-    <!-- Экран авторизации -->
     <div id="loginScreen" class="container">
         <h1>🔐 Secure Access</h1>
         <div class="input-group">
@@ -119,269 +20,38 @@
             <label>Password:</label>
             <input type="password" id="password" placeholder="Enter password">
         </div>
-        <button id="loginBtn" type="button">Authenticate</button>
+        <button id="loginBtn" type="button" class="calc-btn">Authenticate</button>
         <div id="loginError" class="error hidden">❌ Access denied</div>
     </div>
 
-    <!-- Основное приложение -->
     <div id="appScreen" class="container hidden">
         <h1>🔢 QR Code Calculator</h1>
         <div class="input-group">
             <label>QR Code URL:</label>
             <input type="text" id="urlInput" placeholder="http://www.akyapakmakina.com/...?Code1=...&Code2=...">
         </div>
-        <button id="calculateBtn" type="button">Compute Access Code</button>
+        <button id="calculateBtn" type="button" class="calc-btn">Compute Access Code</button>
+        <button id="newCalcBtn" type="button" class="new-btn">Compute New Code</button>
+        <button id="clearBtn" type="button" class="clear-btn">Clear All Fields</button>
         <div id="result" class="result">Result will appear here</div>
         <div class="session-info" id="sessionInfo"></div>
         <button class="logout-btn" id="logoutBtn" type="button">Terminate Session</button>
     </div>
 
     <script>
-        // 🔐 КОНФИГУРАЦИЯ
-        const SESSION_TIME = 5 * 60 * 1000; // 5 минут
-
-        // 🔑 Аутентификация
-        function auth() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            errorDiv.classList.add('hidden');
-            
-            if (username === 'Ivan' && password === 'iv369147as') {
-                const loginTime = Date.now();
-                localStorage.setItem('qr_auth', 'true');
-                localStorage.setItem('qr_user', username);
-                localStorage.setItem('qr_login_time', loginTime.toString());
-                showApp();
-            } else {
-                errorDiv.classList.remove('hidden');
-            }
-        }
-
-        // 🚀 Показать приложение
-        function showApp() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('appScreen').classList.remove('hidden');
-            startSessionTimer();
-        }
-
-        // ⏰ Таймер сессии
-        function startSessionTimer() {
-            const loginTime = parseInt(localStorage.getItem('qr_login_time'));
-            const sessionInfo = document.getElementById('sessionInfo');
-            
-            function updateTimer() {
-                const now = Date.now();
-                const elapsed = now - loginTime;
-                const remaining = SESSION_TIME - elapsed;
-                
-                if (remaining <= 0) {
-                    logout();
-                    return;
-                }
-                
-                const minutes = Math.floor(remaining / 60000);
-                const seconds = Math.floor((remaining % 60000) / 1000);
-                const loginDate = new Date(loginTime);
-                
-                sessionInfo.innerHTML = `User: Ivan | Login: ${loginDate.toLocaleString()} | Auto-logout: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            updateTimer();
-            setInterval(updateTimer, 1000);
-        }
-
-        // 🚪 Выход
-        function logout() {
-            localStorage.removeItem('qr_auth');
-            localStorage.removeItem('qr_user');
-            localStorage.removeItem('qr_login_time');
-            location.reload();
-        }
-
-        // 🧮 АЛГОРИТМ ВЫЧИСЛЕНИЙ (аналог Excel формулы)
-        function calculate() {
-            const url = document.getElementById('urlInput').value.trim();
-            const resultDiv = document.getElementById('result');
-            
-            if (!url) {
-                showResult('❌ Enter URL', 'error');
-                return;
-            }
-
-            try {
-                console.log('Processing URL:', url);
-                
-                // Извлекаем коды из URL
-                const codes = extractCodesFromURL(url);
-                console.log('Extracted codes:', codes);
-                
-                // Ищем основной код (Code4)
-                const mainCode = codes['Code4'];
-                console.log('Main code (Code4):', mainCode);
-                
-                if (!mainCode) {
-                    showResult('❌ Code4 not found in URL', 'error');
-                    return;
-                }
-
-                // Вычисляем результат по алгоритму Excel
-                const result = computeExcelAlgorithm(mainCode);
-                console.log('Computed result:', result);
-                
-                if (result !== null) {
-                    showResult(`✅ Access Code: <b style="font-size: 24px; color: #27ae60;">${result}</b>`, 'success');
-                } else {
-                    showResult('❌ Calculation failed', 'error');
-                }
-                
-            } catch (error) {
-                console.error('Calculation error:', error);
-                showResult('❌ Invalid URL format', 'error');
-            }
-        }
-
-        // 📊 Извлечение кодов из URL
-        function extractCodesFromURL(urlString) {
-            // Добавляем протокол если отсутствует
-            if (!urlString.startsWith('http')) {
-                urlString = 'http://' + urlString;
-            }
-            
-            const url = new URL(urlString);
-            const params = new URLSearchParams(url.search);
-            let codes = {};
-            
-            for (let [key, value] of params) {
-                if (key.startsWith('Code')) {
-                    const numValue = parseInt(value);
-                    if (!isNaN(numValue)) {
-                        codes[key] = numValue;
-                    }
-                }
-            }
-            
-            return codes;
-        }
-
-        // 🧮 РЕАЛИЗАЦИЯ АЛГОРИТМА EXCEL
-        // =B2-ВЫБОР(МАКС((B2>={442000;444000;445000;454000;456000})*{1;2;3;4;5});441473;443473;443475;453487;455487)
-        function computeExcelAlgorithm(mainCode) {
-            // Диапазоны для проверки (B2>={442000;444000;445000;454000;456000})
-            const ranges = [442000, 444000, 445000, 454000, 456000];
-            
-            // Значения для вычитания (441473;443473;443475;453487;455487)
-            const subtractValues = [441473, 443473, 443475, 453487, 455487];
-            
-            // Индексы {1;2;3;4;5} (в JavaScript индексы с 0, поэтому +1)
-            const indices = [1, 2, 3, 4, 5];
-            
-            // (B2>={442000;444000;445000;454000;456000}) - создаем массив true/false
-            const comparisons = ranges.map(range => mainCode >= range);
-            console.log('Comparisons:', comparisons);
-            
-            // Умножаем на индексы {1;2;3;4;5} - true становится 1, false становится 0
-            const multiplied = comparisons.map((comp, index) => comp ? indices[index] : 0);
-            console.log('Multiplied by indices:', multiplied);
-            
-            // Находим МАКСИМАЛЬНОЕ значение
-            const maxIndex = Math.max(...multiplied);
-            console.log('Max index found:', maxIndex);
-            
-            // Если maxIndex = 0, значит код меньше всех диапазонов
-            if (maxIndex === 0) {
-                return null;
-            }
-            
-            // ВЫБОР по индексу (в JavaScript индексы с 0, поэтому -1)
-            const subtractValue = subtractValues[maxIndex - 1];
-            console.log('Subtract value:', subtractValue);
-            
-            // B2 - выбранное_значение
-            const result = mainCode - subtractValue;
-            console.log(`Calculation: ${mainCode} - ${subtractValue} = ${result}`);
-            
-            return result;
-        }
-
-        // 📝 Показать результат
-        function showResult(message, type) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = message;
-            
-            if (type === 'error') {
-                resultDiv.style.color = '#e74c3c';
-            } else if (type === 'success') {
-                resultDiv.style.color = '#27ae60';
-            } else {
-                resultDiv.style.color = '#333';
-            }
-        }
-
-        // 🏁 Инициализация
-        function init() {
-            if (localStorage.getItem('qr_auth') === 'true') {
-                const loginTime = parseInt(localStorage.getItem('qr_login_time'));
-                if (Date.now() - loginTime < SESSION_TIME) {
-                    showApp();
-                } else {
-                    logout();
-                }
-            }
-        }
-
-        // 📋 ОБРАБОТЧИКИ СОБЫТИЙ
-        document.addEventListener('DOMContentLoaded', function() {
-            // Обработчик кнопки входа
-            document.getElementById('loginBtn').addEventListener('click', auth);
-            
-            // Обработчик кнопки вычисления
-            document.getElementById('calculateBtn').addEventListener('click', calculate);
-            
-            // Обработчик кнопки выхода
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-            
-            // Обработчики Enter в полях ввода
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') auth();
-            });
-            
-            document.getElementById('urlInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') calculate();
-            });
-
-            // Автофокус
-            if (!localStorage.getItem('qr_auth')) {
-                document.getElementById('username').focus();
-            } else {
-                document.getElementById('urlInput').focus();
-            }
-            
-            // Инициализация приложения
-            init();
-        });
-
-        // 🧪 ТЕСТОВЫЕ ДАННЫЕ
-        function testAlgorithm() {
-            console.log('=== ТЕСТИРОВАНИЕ АЛГОРИТМА ===');
-            
-            const testCases = [
-                { code: 445000, expected: 1525 }, // 445000 - 443475 = 1525
-                { code: 444500, expected: 1027 }, // 444500 - 443473 = 1027
-                { code: 443000, expected: 1527 }, // 443000 - 441473 = 1527
-                { code: 455000, expected: 1513 }, // 455000 - 453487 = 1513
-                { code: 456500, expected: 1013 }  // 456500 - 455487 = 1013
-            ];
-            
-            testCases.forEach(test => {
-                const result = computeExcelAlgorithm(test.code);
-                console.log(`Code: ${test.code}, Expected: ${test.expected}, Got: ${result}, ${result === test.expected ? '✓' : '✗'}`);
-            });
-        }
-        
-        // Раскомментируйте для тестирования:
-        // testAlgorithm();
+        const _0x1a2b=[300000],_0x3c4d=_0x1a2b[0x0];
+        function _0x2f8a(){const _0x5d=document['getElementById']('username')['value'],_0x3e=document['getElementById']('password')['value'],_0x1c=document['getElementById']('loginError');_0x1c['classList']['add']('hidden');if(_0x5d==='Ivan'&&_0x3e==='iv369147as'){const _0x4a=Date['now']();localStorage['setItem']('q1','1');localStorage['setItem']('q2',_0x5d);localStorage['setItem']('q3',_0x4a['toString']());_0x14e7();}else{_0x1c['classList']['remove']('hidden');}}
+        function _0x14e7(){document['getElementById']('loginScreen')['classList']['add']('hidden');document['getElementById']('appScreen')['classList']['remove']('hidden');_0x29b3();}
+        function _0x29b3(){const _0xe=parseInt(localStorage['getItem']('q3')),_0x1f=document['getElementById']('sessionInfo');function _0x1c(){const _0x5=Date['now'](),_0x3=_0x5-_0xe,_0x4=_0x3c4d-_0x3;if(_0x4<=0x0){_0x1764();return;}const _0xa=Math['floor'](_0x4/0xea60),_0x9=Math['floor']((_0x4%0xea60)/0x3e8);_0x1f['innerHTML']=`Session: ${new Date(_0xe)['toLocaleString']()} | Time left: ${_0xa}:${_0x9['toString']()['padStart'](0x2,'0')}`;}_0x1c();setInterval(_0x1c,0x3e8);}
+        function _0x1764(){localStorage['removeItem']('q1');localStorage['removeItem']('q2');localStorage['removeItem']('q3');location['reload']();}
+        function _0x11d2(){const _0x1e=document['getElementById']('urlInput')['value']['trim'](),_0x18=document['getElementById']('result');if(!_0x1e){_0x4a3('❌ Enter URL','error');return;}try{const _0xd=_0x2b47(_0x1e),_0x13=_0xd['Code4'];if(!_0x13){_0x4a3('❌ Code4 not found','error');return;}const _0x1b=_0x3f61(_0x13);if(_0x1b!==null){_0x4a3(`✅ Code: <b style="font-size:24px;color:#27ae60;">${_0x1b}</b>`,'success');}else{_0x4a3('❌ Calculation failed','error');}}catch(_0x17){_0x4a3('❌ Invalid URL','error');}}
+        function _0x2b47(_0x16){if(!_0x16['startsWith']('http')){_0x16='http://'+_0x16;}const _0x6=new URL(_0x16),_0x19=new URLSearchParams(_0x6['search']);let _0x12={};for(let[_0x7,_0x15]of _0x19){if(_0x7['startsWith']('Code')){const _0xb=parseInt(_0x15);if(!isNaN(_0xb)){_0x12[_0x7]=_0xb;}}}return _0x12;}
+        function _0x3f61(_0x1a){const _0xc=[0x6be28,0x6c6c0,0x6cc68,0x6ee20,0x6f558],_0x8=[0x6bb21,0x6bc59,0x6c8eb,0x6ed6f,0x6f447],_0x14=[0x1,0x2,0x3,0x4,0x5],_0x10=_0xc['map'](_0xf=>_0x1a>=_0xf);const _0x11=_0x10['map']((_0x1d,_0x1e)=>_0x1d?_0x14[_0x1e]:0x0);const _0x1c=Math['max'](..._0x11);if(_0x1c===0x0)return null;const _0x9=_0x8[_0x1c-0x1];return _0x1a-_0x9;}
+        function _0x4a3(_0x1f,_0x20){const _0x18=document['getElementById']('result');_0x18['innerHTML']=_0x1f;_0x18['style']['color']=_0x20==='error'?'#e74c3c':_0x20==='success'?'#27ae60':'#333';}
+        function _0x38d2(){document['getElementById']('urlInput')['value']='';document['getElementById']('result')['innerHTML']='Result will appear here';document['getElementById']('result')['style']['color']='#333';}
+        function _0x2c5f(){_0x38d2();document['getElementById']('urlInput')['focus']();}
+        function _0x3a8e(){if(localStorage['getItem']('q1')==='1'){const _0xe=parseInt(localStorage['getItem']('q3'));if(Date['now']()-_0xe<_0x3c4d){_0x14e7();}else{_0x1764();}}}
+        document['addEventListener']('DOMContentLoaded',function(){document['getElementById']('loginBtn')['addEventListener']('click',_0x2f8a);document['getElementById']('calculateBtn')['addEventListener']('click',_0x11d2);document['getElementById']('newCalcBtn')['addEventListener']('click',_0x2c5f);document['getElementById']('clearBtn')['addEventListener']('click',_0x38d2);document['getElementById']('logoutBtn')['addEventListener']('click',_0x1764);document['getElementById']('password')['addEventListener']('keypress',function(_0x17){if(_0x17['key']==='Enter')_0x2f8a();});document['getElementById']('urlInput')['addEventListener']('keypress',function(_0x17){if(_0x17['key']==='Enter')_0x11d2();});if(!localStorage['getItem']('q1')){document['getElementById']('username')['focus']();}else{document['getElementById']('urlInput')['focus']();}_0x3a8e();});
     </script>
 </body>
 </html>
