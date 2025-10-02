@@ -142,11 +142,10 @@
             const errorDiv = document.getElementById('loginError');
             
             if (VALID_USERS[username] === password) {
-                // Успешный вход
                 localStorage.setItem('qr_calc_auth', 'true');
+                localStorage.setItem('qr_calc_user', username);
                 showApp();
             } else {
-                // Ошибка входа
                 errorDiv.style.display = 'block';
             }
         }
@@ -158,69 +157,150 @@
 
         function logout() {
             localStorage.removeItem('qr_calc_auth');
+            localStorage.removeItem('qr_calc_user');
             location.reload();
         }
 
-        // Проверка при загрузке страницы
         if (localStorage.getItem('qr_calc_auth') === 'true') {
             showApp();
         }
 
-async function calculate() {
-    const url = document.getElementById('urlInput').value;
-    const resultDiv = document.getElementById('result');
-    const calculateBtn = document.querySelector('button[onclick="calculate()"]');
-    
-    if (!url) {
-        showResult('❌ Введите URL', 'error');
-        return;
-    }
-    
-    if (!url.includes('akyapakmakina.com') || !url.includes('Code')) {
-        showResult('❌ Неверный URL Akyapak', 'error');
-        return;
-    }
-    
-    // Показываем загрузку
-    calculateBtn.disabled = true;
-    calculateBtn.textContent = 'Вычисляем...';
-    showResult('⏳ Вычисляем код доступа...', 'loading');
-    
-    try {
-        // 🔒 ОТПРАВЛЯЕМ ЗАПРОС НА БЭКЕНД
-        const response = await fetch('/api/calculate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ url: url })
+        function calculate() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!url) {
+                showResult('❌ Введите URL', 'error');
+                return;
+            }
+
+            if (!url.includes('akyapakmakina.com') || !url.includes('Code')) {
+                showResult('❌ Неверный URL Akyapak', 'error');
+                return;
+            }
+
+            try {
+                const codes = extractCodesFromURL(url);
+                const fourDigitCode = findFourDigitCode(codes);
+                const result = calculateFinalResult(fourDigitCode);
+                
+                if (result !== null) {
+                    showResult(`✅ Код доступа: <b style="font-size: 24px;">${result}</b>`, 'success');
+                } else {
+                    showResult('❌ Не удалось вычислить код доступа', 'error');
+                }
+            } catch (error) {
+                showResult('❌ Ошибка при вычислении', 'error');
+            }
+        }
+
+        function extractCodesFromURL(urlString) {
+            try {
+                const url = new URL(urlString);
+                const params = new URLSearchParams(url.search);
+                let codes = {};
+                
+                for (let [key, value] of params) {
+                    if (key.startsWith('Code')) {
+                        codes[key] = parseInt(value);
+                    }
+                }
+                return codes;
+            } catch (error) {
+                throw new Error('Неверный формат URL');
+            }
+        }
+
+        function findFourDigitCode(codesMap) {
+            const codes = Object.values(codesMap);
+            for (let i = 0; i < codes.length; i++) {
+                if (codes[i].toString().startsWith('4')) {
+                    return codes[i];
+                }
+            }
+            return null;
+        }
+
+        function calculateFinalResult(mainCode) {
+            if (!mainCode) return null;
+            
+            const configuration = obtainSettings();
+            const processedConfig = transformConfiguration(configuration);
+            
+            for (let index = processedConfig.checkPoints.length - 1; index >= 0; index--) {
+                if (mainCode >= processedConfig.checkPoints[index]) {
+                    return mainCode - processedConfig.deductionValues[index];
+                }
+            }
+            return null;
+        }
+
+        function obtainSettings() {
+            return {
+                segmentAlpha: "442000,441473",
+                segmentBeta: ["444000", "443473"],
+                segmentGamma: { thresholdValue: 445000, baseNumber: 443475 },
+                segmentDelta: { check: 454000, subtract: 453487 },
+                segmentEpsilon: "456000:455487",
+                extraParams: {
+                    offset: 0,
+                    multiplier: 1
+                }
+            };
+        }
+
+        function transformConfiguration(rawConfig) {
+            const checkPoints = [];
+            const deductionValues = [];
+            
+            const alphaComponents = rawConfig.segmentAlpha.split(',');
+            checkPoints.push(parseInt(alphaComponents[0]) + rawConfig.extraParams.offset);
+            deductionValues.push(parseInt(alphaComponents[1]) + rawConfig.extraParams.offset);
+            
+            checkPoints.push(parseInt(rawConfig.segmentBeta[0]) * rawConfig.extraParams.multiplier);
+            deductionValues.push(parseInt(rawConfig.segmentBeta[1]) * rawConfig.extraParams.multiplier);
+            
+            checkPoints.push(rawConfig.segmentGamma.thresholdValue);
+            deductionValues.push(rawConfig.segmentGamma.baseNumber);
+            
+            checkPoints.push(rawConfig.segmentDelta.check);
+            deductionValues.push(rawConfig.segmentDelta.subtract);
+            
+            const epsilonParts = rawConfig.segmentEpsilon.split(':');
+            checkPoints.push(parseInt(epsilonParts[0]));
+            deductionValues.push(parseInt(epsilonParts[1]));
+            
+            return { 
+                checkPoints, 
+                deductionValues 
+            };
+        }
+
+        function showResult(message, type = '') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = 'result ' + type;
+        }
+
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showResult(`✅ Код доступа: <b style="font-size: 24px;">${data.result}</b>`, 'success');
-        } else {
-            showResult(`❌ ${data.error}`, 'error');
-        }
-    } catch (error) {
-        showResult('❌ Ошибка соединения с сервером', 'error');
-    } finally {
-        calculateBtn.disabled = false;
-        calculateBtn.textContent = 'Вычислить код доступа';
-    }
-}
 
-// Добавьте эту вспомогательную функцию
-function showResult(message, type = '') {
-    const resultDiv = document.getElementById('result');
-    resultDiv.innerHTML = message;
-    resultDiv.className = 'result ' + type;
-}
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkLogin();
+            }
+        });
 
-            // Простой пример вычисления
-            resultDiv.innerHTML = '✅ Код доступа: 1782';
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('qr_calc_auth')) {
+                document.getElementById('username').focus();
+            } else {
+                document.getElementById('urlInput').focus();
+            }
+        });
     </script>
 </body>
 </html>
